@@ -39,7 +39,7 @@ export interface Player {
   avatar: string;
   battle_id: number;
   monster_id: number;
-  eliminated_at: number | null;
+  eliminated_at: number;
   annulled_at: number;
   rank: number;
   point: number;
