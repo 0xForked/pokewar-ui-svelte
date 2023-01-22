@@ -21,7 +21,7 @@
 
   async function loadBattles() {
     try {
-      const resource = await GET('battles', limit, offset).then()
+      const resource = await GET(`battles?limit=${limit}&offset=${offset}`)
       const response = await resource.json()
       const data = response.data
       console.log(data)

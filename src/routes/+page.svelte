@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-    <title>Home | Pokewar - Pocket Monster Battleroyale</title> 
+  <title>Home | Pokewar - Pocket Monster Battleroyale</title> 
 </svelte:head>
 
 <section class="flex flex-col items-center justify-center h-screen">

@@ -5,10 +5,12 @@
   import Navigation from "$lib/components/navigation.svelte";
   import type { Monster } from "$lib/api/model";
 	import MonsterCard from "$lib/components/monster.svelte";
+	import { goto } from "$app/navigation";
   
   let title = "monsters"
   
   // TODO: apply reactive stream
+  const maxSyncThresholds = 120
   const limit = 8
   let totalData = 0
   let offset = 0
@@ -25,7 +27,7 @@
 
   const loadMonsters = async () => {
     try {
-      const resource = await GET('monsters', limit, offset).then()
+      const resource = await GET(`monsters?limit=${limit}&offset=${offset}`)
       const response = await resource.json()
       const data = response.data as Monster[]
       monsters = monsters.concat(data)
@@ -35,25 +37,40 @@
       title = `monsters (${monsters.length})`
       totalData = response.total_data
     } catch(err: any) {
-      alert(err)
       isLoading = false
+      if (confirm(err)) {
+        goto('/')
+      }
     }
   }
 
   const syncMonsters = async () => { 
     try {
-      console.log("do sync")
-    } catch (e: any) {
-      alert("hello")
+      if (confirm("Are you sure want to add more data?!") === true) {
+        const resource = await GET('monsters/sync')
+        const response = await resource.json()
+        const data = response.data as Monster[]
+        monsters = monsters.concat(data)
+        temps = monsters
+        isLoading = false
+        offset = offset + data.length
+        title = `monsters (${monsters.length})`
+        totalData = response.total_data
+      }
+    } catch (err: any) {
+      isLoading = false
+      if (confirm(err)) {
+        //goto('/')
+      }
     }
   }
 
   // For Search Input
   const searchMonster = () => monsters = (searchTerm !== "")
-      ? temps.filter(monster =>
-          monster.name.toLowerCase()
-              .includes(searchTerm.toLowerCase()))
-      : temps
+    ? temps.filter(monster =>
+        monster.name.toLowerCase()
+            .includes(searchTerm.toLowerCase()))
+    : temps
 </script>
 
 <svelte:head>
@@ -71,7 +88,7 @@
         <label for="search"></label>
         <input bind:value={searchTerm} on:input={searchMonster} type="search" name="search" id="search" class="py-2 text-sm text-black bg-white rounded-md pl-10 pr-2 border-solid border-2 border-gray-400 focus:bg-white focus:border-gray-600 focus:outline-none" placeholder="Search..." autocomplete="off">
       </div>
-      {#if monsters.length === 0 || totalData < 160}
+      {#if monsters.length === 0 || totalData < maxSyncThresholds}
         <button on:click={syncMonsters} class="px-4 py-[8px] rounded-md border-solid border-2 text-gray-600 border-gray-400 bg-gray-100 flex items-center gap-2 hover:bg-gray-200 focus:bg-gray-600 focus:text-white text-sm" id="sync-monster-button">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
@@ -93,7 +110,7 @@
       <div class="text-center">loading please wait . . .</div>
     {/if}
    
-    {#if monsters.length > 0 && totalData < 160}
+    {#if totalData > 0 && monsters.length < totalData && searchTerm === ""}
       <div class="flex my-8 w-full">
         <button class="mx-auto font-bold cursor-pointer tracking-tighter text-black border-b-2 border-red-200 hover:border-red-400" on:click={loadMonsters}>Load more . . .</button>
       </div>
