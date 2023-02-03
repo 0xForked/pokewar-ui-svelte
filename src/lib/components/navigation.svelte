@@ -18,5 +18,5 @@
       />
     </svg>
   </a>
-  <h5 class="text-lg font-bold ml-4">{title.toLocaleUpperCase()}</h5>
+  <h5 class="text-lg font-bold ml-4 uppercase">{title}</h5>
 </div>

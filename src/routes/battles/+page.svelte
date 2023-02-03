@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { GET } from "$lib/api/rest";
+	import { GET } from "$lib/data/rest";
 	import { toTitleCase } from "$lib/utils/string";
-	import { onMount } from "svelte";
+	import { onDestroy, onMount } from "svelte";
   import Navigation from "$lib/components/navigation.svelte";
-	import type { Battle } from "$lib/api/model";
-	import { diffTime, formatDate, formatTime } from "$lib/utils/datetime";
+	import type { Battle } from "$lib/data/model";
 	import BattleCard from "$lib/components/battle.svelte";
 
   let title = "battles"
@@ -17,22 +16,30 @@
 
   onMount(async function () {
     battles = []
-    isLoading = true
     await loadBattles()
   })
 
   async function loadBattles() {
     try {
+      if (battles.length >= limit) {
+        battles = battles.splice(0, limit)
+        return
+      }
+      
+      isLoading = true
       const resource = await GET(`battles?limit=${limit}&offset=${offset}`)
       const response = await resource.json()
-      const data = response.data
-      battles = battles.concat(data)
+      battles = response.data
       isLoading = false
     } catch(err: any) {
       alert(err)
       isLoading = false
     }
   }
+
+  onDestroy(() => {
+    battles = []
+	});
 </script>
 
 <svelte:head>
@@ -60,7 +67,7 @@
       <!-- TODO ADD DATE RANGE -->
     </div>
     <div class="mt-7 flex flex-wrap gap-8 items-center justify-center w-full">
-      {#if battles.length > 0}
+      {#if battles.length > 0 && !isLoading}
         {#each battles as battle}
           <BattleCard {battle} />
         {/each}

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { GET } from "$lib/api/rest";
+	import { GET } from "$lib/data/rest";
 	import { toTitleCase } from "$lib/utils/string";
-	import { onMount } from "svelte";
+	import { onDestroy, onMount } from "svelte";
   import Navigation from "$lib/components/navigation.svelte";
-  import type { Monster } from "$lib/api/model";
+  import type { Monster } from "$lib/data/model";
 	import MonsterCard from "$lib/components/monster.svelte";
 	import { goto } from "$app/navigation";
   
@@ -21,21 +21,21 @@
 
   onMount(async function () {
     monsters = []
-    isLoading = true
     await loadMonsters()
   })
 
   const loadMonsters = async () => {
     try {
+      isLoading = true
       const resource = await GET(`monsters?limit=${limit}&offset=${offset}`)
       const response = await resource.json()
       const data = response.data as Monster[]
       monsters = monsters.concat(data)
       temps = monsters
-      isLoading = false
       offset = offset + data.length
       title = `monsters (${monsters.length})`
       totalData = response.total_data
+      isLoading = false
     } catch(err: any) {
       isLoading = false
       if (confirm(err)) {
@@ -71,6 +71,11 @@
         monster.name.toLowerCase()
             .includes(searchTerm.toLowerCase()))
     : temps
+
+  onDestroy(() => {
+    monsters = []
+    temps = []
+	});
 </script>
 
 <svelte:head>

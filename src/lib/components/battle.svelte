@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Battle } from "$lib/api/model";
+	import type { Battle } from "$lib/data/model";
 	import { diffTime, formatDate, formatTime } from "$lib/utils/datetime";
 	import { toTitleCase } from "$lib/utils/string";
   export let battle: Battle

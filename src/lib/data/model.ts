@@ -17,6 +17,9 @@ export interface Monster {
   weight: number;
   avatar: string;
   types: string[];
+  rank?: number;
+  point?: number;
+  annulled: boolean;
   stats: Stat[];
   skills: Skill[];
 }

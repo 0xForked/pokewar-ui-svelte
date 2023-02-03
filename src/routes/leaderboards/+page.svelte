@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Rank } from "$lib/api/model";
-	import { GET } from "$lib/api/rest";
+	import type { Rank } from "$lib/data/model";
+	import { GET } from "$lib/data/rest";
 	import { toTitleCase } from "$lib/utils/string";
-	import { onMount } from "svelte";
+	import { onDestroy, onMount } from "svelte";
   import Navigation from "$lib/components/navigation.svelte";
 	import { goto } from "$app/navigation";
  
@@ -15,12 +15,16 @@
 
   onMount(async function () {
     ranks = []
-    isLoading = true
     await loadRanks()
   })
 
   async function loadRanks() {
     try {
+      if (ranks.length >= limit) {
+        ranks = ranks.splice(0, limit)
+        return
+      }
+
       isLoading = true
       const resource = await GET(`ranks?limit=${limit}&offset=0`)
       const response = await resource.json()
@@ -41,6 +45,10 @@
     })
     return data
   }
+
+  onDestroy(() => {
+    ranks = []
+	});
 </script>
 
 <svelte:head>
