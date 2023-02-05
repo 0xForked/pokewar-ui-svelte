@@ -23,7 +23,7 @@
   let battleHistories: string[] = [] 
 
   onMount(() => { 
-    if (socketConnId === undefined) { 
+    if (socketConnId == undefined) {
       socketConnId = generateRandomId()
     }
     socket = InitWS(socketConnId) 
@@ -117,7 +117,7 @@
   const handleAnnulled = (value: number) => sendWSMessage('annulled', value);
 
   onDestroy(() => { 
-    socket.close()
+    // socket.close()
     players = [] 
   })
 </script>
@@ -147,9 +147,19 @@
         <MonsterCard 
           {monster} 
           isMiniCard={true} 
-          displayAnnulledButton={displayAnnulledButton} 
-          {handleAnnulled}
-        />
+        >
+          {#if monster.rank != undefined && monster.point != undefined}
+          <div class="flex flex-col">
+            <div class="mt-4 flex flex-row border-2 border-solid divide-x divide-solid w-full {monster.annulled ? 'border-red-100 bg-red-200' : 'border-gray-200'}">
+              <div class="basis-1/2 w-full text-center py-6">#{monster.rank}</div>
+              <div class="basis-1/2 w-full text-center py-6">{monster.point} pts</div>
+            </div>
+            {#if displayAnnulledButton}
+              <button class="mt-4 px-4 py-[8px] rounded-md border-solid border-2 text-red-600 border-red-400 bg-red-100 flex items-center justify-center gap-2 hover:bg-red-200 focus:bg-red focus:text-white text-sm disabled:bg-red-100  disabled:opacity-25" on:click={() => handleAnnulled(monster.id)} disabled={monster.annulled}>ANNULLED</button>
+            {/if}
+          </div>
+          {/if}
+        </MonsterCard>
       {/each}
     </div>
   {:else}

@@ -6,6 +6,7 @@
   import type { Monster } from "$lib/data/model";
 	import MonsterCard from "$lib/components/monster.svelte";
 	import { goto } from "$app/navigation";
+    import monster from "../../lib/components/monster.svelte";
   
   let title = "monsters"
   
@@ -66,11 +67,21 @@
   }
 
   // For Search Input
-  const searchMonster = () => monsters = (searchTerm !== "")
-    ? temps.filter(monster =>
-        monster.name.toLowerCase()
-            .includes(searchTerm.toLowerCase()))
-    : temps
+  const searchMonster = async () => {
+    if (searchTerm !== "") {
+      isLoading = true
+      const resource = await GET(`monsters?name=${searchTerm.toLowerCase()}`)
+      const response = await resource.json()
+      monsters = response.data as Monster[]
+      console.log(monster)
+      title = `search monsters`
+      isLoading = false
+      return
+    }
+
+    title = `monsters (${temps.length})`
+    monsters = temps
+  }
 
   onDestroy(() => {
     monsters = []
@@ -93,7 +104,7 @@
         <label for="search"></label>
         <input bind:value={searchTerm} on:input={searchMonster} type="search" name="search" id="search" class="py-2 text-sm text-black bg-white rounded-md pl-10 pr-2 border-solid border-2 border-gray-400 focus:bg-white focus:border-gray-600 focus:outline-none" placeholder="Search..." autocomplete="off">
       </div>
-      {#if monsters.length === 0 || totalData < maxSyncThresholds}
+      {#if totalData < maxSyncThresholds}
         <button on:click={syncMonsters} class="px-4 py-[8px] rounded-md border-solid border-2 text-gray-600 border-gray-400 bg-gray-100 flex items-center gap-2 hover:bg-gray-200 focus:bg-gray-600 focus:text-white text-sm" id="sync-monster-button">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
@@ -103,19 +114,21 @@
       {/if}
     </div>
 
-    {#if monsters.length > 0}
+    {#if monsters?.length > 0}
       <div class="flex flex-wrap gap-8 w-full items-center justify-center">
         {#each monsters as monster}
           <MonsterCard {monster} isMiniCard={false} />
         {/each}
       </div>
+    {:else}
+      <div class="text-center">No monster found . . . </div>
     {/if}
 
     {#if isLoading}
       <div class="text-center">loading please wait . . .</div>
     {/if}
    
-    {#if totalData > 0 && monsters.length < totalData && searchTerm === ""}
+    {#if totalData > 0 && monsters?.length < totalData && searchTerm === ""}
       <div class="flex my-8 w-full">
         <button class="mx-auto font-bold cursor-pointer tracking-tighter text-black border-b-2 border-red-200 hover:border-red-400" on:click={loadMonsters}>Load more . . .</button>
       </div>

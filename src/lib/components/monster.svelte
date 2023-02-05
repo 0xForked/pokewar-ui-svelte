@@ -1,12 +1,9 @@
 <script lang="ts">
-	import type { Monster, Skill, Stat } from "$lib/data/model";
+    import type { Monster, Skill, Stat } from "$lib/data/model";
 	import { toTitleCase } from "$lib/utils/string";
 
   export let monster: Monster;
-  export let isMiniCard: boolean = false;
-  export let displayAnnulledButton: boolean = false;
-  export let handleAnnulled: any
-  const onAnnulled = (id: number) =>  handleAnnulled(id)
+  export let isMiniCard = false;
 
   const getHP = (stats: Stat[]): string => {
     let hp = ""
@@ -46,16 +43,5 @@
         </p>
     </div>
   </div>
-  
-  {#if monster.rank != undefined && monster.point != undefined}
-  <div class="flex flex-col">
-    <div class="mt-4 flex flex-row border-2 border-solid divide-x divide-solid w-full">
-      <div class="basis-1/2 w-full text-center py-6">#{monster.rank}</div>
-      <div class="basis-1/2 w-full text-center py-6">{monster.point} pts</div>
-    </div>
-    {#if displayAnnulledButton}
-      <button class="mt-4 px-4 py-[8px] rounded-md border-solid border-2 text-red-600 border-red-400 bg-red-100 flex items-center justify-center gap-2 hover:bg-red-200 focus:bg-red focus:text-white text-sm disabled:bg-red-100  disabled:opacity-25" on:click={() => onAnnulled(monster.id)}>ANNULLED</button>
-    {/if}
-  </div>
-  {/if}
+  <slot />
 </div>
